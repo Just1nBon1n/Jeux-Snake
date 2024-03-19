@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Jeux Snake Test</title>
+        <script type="text/javascript" src="js/objetsSnake.js"></script>
+        <script type="text/javascript" src="js/fonctionsSnake.js"></script>
+        <style type="text/css">
+            body {
+                text-align: center;
+                
+            }
+
+            p {
+                font: italic 16px Arial;
+            }
+
+            canvas {
+                    border: 3px solid black;
+            }
+
+        </style>
+    </head>
+
+    <body>  
+        <p>Test jeux snake</p>
+        <canvas width="900" height="500"> </canvas>
+
+        <script>
+            //Récupération canvas
+            let leCanvas = document.querySelector("canvas");
+            let ctx = leCanvas.getContext("2d");
+
+            //Charger l'image de l'animation d'intro
+            arrierePlanIntro.img.src = arrierePlanIntro.urlImage;
+
+            //Charger l'image de fond du jeu
+            fondJeu.img.src = fondJeu.urlImage;
+
+            //Charger l'image du serpent
+            serpent.img.src = serpent.urlImage;
+            //Positionement du serpent
+            serpent.x = 100; 
+            serpent.y = (Math.floor(Math.random() * 2)) * 50 + 200;
+
+            //Charger l'image de la queue du serpent
+            queue.img.src = queue.urlImage;
+            queue.x = 100; 
+            queue.y = (Math.floor(Math.random() * 2)) * 50 + 200;
+
+            //Charger l'image du fruit
+            coffre.img.src = coffre.urlImage;
+
+            //Positioner le coffre a un endroit aléatoire dans l'aire de jeu
+            coffre.x = (Math.floor(Math.random() * 14)) * 50 + 100;       
+            coffre.y = (Math.floor(Math.random() * 10)) * 50;              
+
+            //Début du jeu false car il n'est pas encore commencé
+            let debutJeu = false;
+
+            //Score du joueur
+            let score = 0;
+
+            //Création du tableau pour enregister les segments de la queue
+            let serpentQueue = [];
+
+            //Fin jeu false quand le jeu commence
+            let finJeu = true;
+
+            //Musique du jeu
+            let sonJeu = new Audio("sons/marioChateau.mp3");
+
+            /////////////////////////////////////////////////////////////////////////////////////////////
+
+            //Mise a jour des dessins
+            let intervalJeuID;
+
+            //Actualisation animation intro 
+            let intervalArrierePlanIntroID = setInterval(gererAnimationArrierePlanIntro, 1000/6);
+            //Actualisation animation fond jeu
+            let intervalFondJeuID;
+
+            //Écouteurs pour détecter si des touches du clavier sont appuyées ou relâcchées
+            document.addEventListener("keydown", commencerJeu);
+            document.addEventListener("keydown", presserTouche);
+            document.addEventListener("keydown", recommencerJeu);
+
+            ///////////////////////////////////// LES FONCTIONS /////////////////////////////////////////
+
+            function actualiserLeJeu() {
+                //Effacer le contenu actuel du canvas
+                ctx.clearRect(0, 0, leCanvas.width, leCanvas.height);
+
+                //Dessiner l'arrière plan
+                ctx.drawImage(
+                    fondJeu.img,
+                    fondJeu.sourceX,
+                    0,
+                    fondJeu.largeur,
+                    fondJeu.hauteur,
+                    fondJeu.x,
+                    fondJeu.y,
+                    fondJeu.largeur,
+                    fondJeu.hauteur
+                    );
+
+                //Dessiner le coffre
+                ctx.drawImage(coffre.img, coffre.x, coffre.y, coffre.largeur, coffre.hauteur);
+
+                //Bouger le serpent
+                bougerSerpent(); 
+
+                //Si il y a une collisoin entre le serpent et le coffre
+                let detecterCollisionSerpentCoffre = detecterCollision(serpent, coffre);
+                if (detecterCollisionSerpentCoffre) {
+                    //Augmente le score de 1
+                    score++;
+                    //Ajout de 1 de longueur pour le serpent
+                    serpent.longueur++;
+                    //Changement de la position du coffre
+                    coffre.x = (Math.floor(Math.random() * 14)) * 50 + 100;       
+                    coffre.y = (Math.floor(Math.random() * 10)) * 50;
+                    if (score == 10) {
+                        finJeu = true;
+                    }  
+                }
+
+                collisionEntreSerpentEtQueue();
+
+                //Commande pour la fin de partie
+                if (finJeu) {
+                    clearInterval(intervalJeuID);
+                    if (score == 10) {
+                        afficherMessageGagnant();
+                    } else {
+                        afficherMessagePerdant();
+                    }
+                }
+
+                //Affichage du score
+                afficherScore();
+            }
+        </script>
+    </body>
+</html>
